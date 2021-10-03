@@ -1,0 +1,24 @@
+sudo apt-get update && sudo apt-get -y install python3-pip && sudo pip3 install flask && sudo apt-get -y install nginx && sudo apt-get -y install gunicorn &&
+mkdir flask_app && cd flask_app
+sudo echo "from flask import Flask
+app = Flask(__name__)
+@app.route('/')
+def myFlaskApp():
+         return 'cluster1-instance2 (i-0384aedd68aab1193) is responding now! '
+
+if __name__ == '__main__':
+       app.run()" | sudo tee app.py
+cd /etc/nginx/ && cd sites-enabled/
+sudo rm default
+sudo echo "
+  server {
+    listen 80;
+    server_name 44.193.210.154;
+    access_log  /var/log/nginx/example.log;
+    location / {
+        proxy_pass http://127.0.0.1:8000/;
+    }
+  }" | sudo tee flask_app
+sudo service nginx restart
+cd ~ && cd flask_app/
+gunicorn app:app

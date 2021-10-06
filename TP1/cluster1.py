@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+import re
 import requests
 import time 
 import boto3
@@ -8,7 +9,7 @@ def consumeGETRequestSync():
 
     clientCrt = ""
     clientKey = ""
-    url = "http://cluster1-2146860487.us-east-1.elb.amazonaws.com" #changer le url
+    url = "http://test-2074630864.us-east-1.elb.amazonaws.com" #changer le url
     certServer = ""
     headers = { "Accept": "application/json" }
     r = requests.get(url,
@@ -25,40 +26,19 @@ def consumeGETRequestSync():
 #for i in range(1000):
 consumeGETRequestSync()
 
-# cloudwatch = boto3.resource('cloudwatch')
-# metric = cloudwatch.Metric('namespace','name')
-cloudwatch = boto3.client('cloudwatch')
-response = cloudwatch.get_metric_data(
-    MetricDataQueries=[
-        {
-            'Id': 'string',
-            'MetricStat': {
-                'Metric': {
-                    'Namespace': 'string',
-                    'MetricName': 'string',
-                    'Dimensions': [
-                        {
-                            'Name': 'string',
-                            'Value': 'string'
-                        },
-                    ]
-                },
-                'Period': 123,
-                'Stat': 'string',
-                'Unit': 'Seconds'|'Microseconds'|'Milliseconds'|'Bytes'|'Kilobytes'|'Megabytes'|'Gigabytes'|'Terabytes'|'Bits'|'Kilobits'|'Megabits'|'Gigabits'|'Terabits'|'Percent'|'Count'|'Bytes/Second'|'Kilobytes/Second'|'Megabytes/Second'|'Gigabytes/Second'|'Terabytes/Second'|'Bits/Second'|'Kilobits/Second'|'Megabits/Second'|'Gigabits/Second'|'Terabits/Second'|'Count/Second'|'None'
-            },
-            'Expression': 'string',
-            'Label': 'string',
-            'ReturnData': True|False,
-            'Period': 123,
-            'AccountId': 'string'
-        },
-    ],
-    StartTime=datetime(2021, 10, 3),
-    EndTime=datetime(2021, 10, 4),
-)
 #scenario 2
 #for i in range(500):
 #time.sleep(60)
 #for i in range(1000):
-consumeGETRequestSync()
+#consumeGETRequestSync()
+
+#CloudWatch
+# cloudwatch = boto3.resource('cloudwatch')
+# metric = cloudwatch.Metric('namespace','name')
+cloudwatch = boto3.client('cloudwatch')
+
+#list of metrics 
+# https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.list_metrics
+response = cloudwatch.list_metrics(Namespace= 'AWS/ApplicationELB')
+
+print(json.dumps(response, indent=4, sort_keys=True))

@@ -43,7 +43,7 @@ last_dimension = response["Metrics"][len(response["Metrics"])-1] ["Dimensions"]
 name = last_dimension[0] ['Name']
 value = last_dimension[0] ['Value']
 
-response1 = cloudwatch.get_metric_data(MetricDataQueries=[
+data_response = cloudwatch.get_metric_data(MetricDataQueries=[
         {
             'Id': 'testffd',
             'MetricStat': {
@@ -64,4 +64,6 @@ response1 = cloudwatch.get_metric_data(MetricDataQueries=[
     ],
     StartTime=datetime.utcnow() - timedelta(minutes=120),
     EndTime=datetime.utcnow())
-print(json.dumps(response1, indent=4, sort_keys=True, default=str))
+data_set = zip(data_response["MetricDataResults"][0]["Timestamps"], data_response["MetricDataResults"][0]["Values"])
+#print(data_set)
+print(json.dumps(list(data_set), indent=4, sort_keys=True, default=str))

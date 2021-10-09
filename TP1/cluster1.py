@@ -39,7 +39,10 @@ cloudwatch = boto3.client('cloudwatch')
 #list of metrics 
 # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.list_metrics
 response = cloudwatch.list_metrics(Namespace= 'AWS/ApplicationELB', MetricName= 'RequestCount')
-#print(json.dumps(response, indent=4, sort_keys=True))
+last_dimension = response["Metrics"][len(response["Metrics"])-1] ["Dimensions"]
+name = last_dimension[0] ['Name']
+value = last_dimension[0] ['Value']
+
 response1 = cloudwatch.get_metric_data(MetricDataQueries=[
         {
             'Id': 'testffd',
@@ -49,8 +52,8 @@ response1 = cloudwatch.get_metric_data(MetricDataQueries=[
                     'MetricName': 'RequestCount',
                     "Dimensions": [
                 {
-                    "Name": "LoadBalancer",
-                    "Value": "app/test12/5bb33f08a2eeaf29"
+                    'Name': name,
+                    'Value': value
                 }
             ],
                 },

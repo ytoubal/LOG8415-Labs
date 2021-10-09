@@ -1,15 +1,14 @@
 from datetime import datetime
+from datetime import timedelta
 import json
-import re
 import requests
-import time 
 import boto3
 
 def consumeGETRequestSync():
 
     clientCrt = ""
     clientKey = ""
-    url = "http://test-2074630864.us-east-1.elb.amazonaws.com" #changer le url
+    url = "http://test12-2135488930.us-east-1.elb.amazonaws.com" #changer le url
     certServer = ""
     headers = { "Accept": "application/json" }
     r = requests.get(url,
@@ -39,6 +38,27 @@ cloudwatch = boto3.client('cloudwatch')
 
 #list of metrics 
 # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.list_metrics
-response = cloudwatch.list_metrics(Namespace= 'AWS/ApplicationELB')
-
-print(json.dumps(response, indent=4, sort_keys=True))
+response = cloudwatch.list_metrics(Namespace= 'AWS/ApplicationELB', MetricName= 'RequestCount')
+#print(json.dumps(response, indent=4, sort_keys=True))
+response1 = cloudwatch.get_metric_data(MetricDataQueries=[
+        {
+            'Id': 'testffd',
+            'MetricStat': {
+                'Metric': {
+                    'Namespace': 'AWS/ApplicationELB',
+                    'MetricName': 'RequestCount',
+                    "Dimensions": [
+                {
+                    "Name": "LoadBalancer",
+                    "Value": "app/test12/5bb33f08a2eeaf29"
+                }
+            ],
+                },
+                'Period': 120,
+                'Stat': 'Sum',
+            },
+        },
+    ],
+    StartTime=datetime.utcnow() - timedelta(minutes=120),
+    EndTime=datetime.utcnow())
+print(json.dumps(response1, indent=4, sort_keys=True, default=str))

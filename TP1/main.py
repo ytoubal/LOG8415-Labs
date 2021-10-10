@@ -3,6 +3,8 @@ from datetime import timedelta
 import json
 import requests
 import boto3
+import pandas as pd
+import matplotlib.pyplot as plt
 
 def consumeGETRequestSync(cluster):
 
@@ -96,6 +98,30 @@ def constructMetricQuery(metric_query, metrics, name, value, n_cluster):
                 }
             })
 
+def generateGraphs(data_cluster1, data_cluster2):
+    plt.rcParams["figure.figsize"] = 10,5
+    for i in range(len(data_cluster1)):
+        data1_dict = data_cluster1[i]
+        data2_dict = data_cluster2[i]
+        # retrieving the metrics label
+        metrics_label = data1_dict.get('Label').split()[1]
+        # Convert dictionnary data into pandas
+        my_data1 = pd.DataFrame.from_dict(data1_dict)[["Timestamps","Values"]]
+        my_data1.rename(columns={'Values': 'Cluster1'}, inplace=True)
+        my_data2 = pd.DataFrame.from_dict(data2_dict)[["Timestamps","Values"]]
+        # Renanme columns
+        my_data2.rename(columns={'Values': 'Cluster2'}, inplace=True)
+        # Parse strings to datetime type
+        my_data1["Timestamps"] = pd.to_datetime(my_data1["Timestamps"], infer_datetime_format=True)
+        my_data2["Timestamps"] = pd.to_datetime(my_data2["Timestamps"], infer_datetime_format=True)
+        if (len(my_data1)!=0 and len(my_data2)!=0):
+            plt.xlabel("Timestamps")
+            plt.plot("Timestamps", "Cluster1", color="red", data=my_data1)
+            plt.plot("Timestamps", "Cluster2", color="green", data=my_data2)
+            plt.title(metrics_label)
+            plt.legend()
+            plt.savefig(f'{metrics_label}')
+
 runScenario1()
 runScenario2()
 
@@ -121,45 +147,5 @@ data_tg_cluster2 = data_set[len(metrics_elb)*2+len(metrics_tg):] # 0 to len(metr
 data_cluster1 = data_elb_cluster1 + data_tg_cluster1
 data_cluster2 = data_elb_cluster2 + data_tg_cluster2
 
-print(json.dumps(data_tg_cluster1, indent=4, sort_keys=True, default=str))
+generateGraphs(data_cluster1, data_cluster2)
 
-import pandas as pd
-import matplotlib.pyplot as plt
-
-plt.rcParams["figure.figsize"] = 10,5
-for i in range(len(data_cluster1)):
-    data1_dict = data_cluster1[i]
-    data2_dict = data_cluster2[i]
-    metrics_label = data1_dict.get('Label').split()[1]
-    my_data1 = pd.DataFrame.from_dict(data1_dict)[["Timestamps","Values"]]
-    my_data1.rename(columns={'Values': 'Cluster1'}, inplace=True)
-    my_data2 = pd.DataFrame.from_dict(data2_dict)[["Timestamps","Values"]]
-    my_data2.rename(columns={'Values': 'Cluster2'}, inplace=True)
-    # Parse strings to datetime type
-    my_data1["Timestamps"] = pd.to_datetime(my_data1["Timestamps"], infer_datetime_format=True)
-    my_data2["Timestamps"] = pd.to_datetime(my_data2["Timestamps"], infer_datetime_format=True)
-    #merge_data = pd.concat([my_data1,my_data2])
-    if (len(my_data1)!=0 and len(my_data2)!=0):
-        #my_data1.plot(x="Timestamps", y="Cluster1")
-        #my_data2.plot(x="Timestamps", y="Cluster2")
-        #ax = my_data1.plot(y="Cluster1")
-        #my_data2.drop("Timestamps",axis=1).plot(ax=ax)
-        #merge_data.plot(x="Timestamps", y=["Cluster1","Cluster2"])
-        fig=plt.figure()
-        ax=fig.add_subplot(111, label="1")
-        ax.legend()
-        ax2=fig.add_subplot(111, label="2", frame_on=False)
-        ax2.legend()
-
-        ax.plot(my_data1["Timestamps"], my_data1["Cluster1"], color="C0", label="Cluster1")
-        ax.set_xlabel("x label 1", color="C0")
-        ax.set_ylabel("y label 1", color="C0")
-
-        ax2.plot(my_data2["Timestamps"], my_data2["Cluster2"], color="C3", label="Cluster2")
-        ax2.set_xticks([])
-        ax2.set_yticks([])
-
-        plt.legend()
-        plt.title(metrics_label)
-        #plt.xlabel("Timestamps")
-        plt.savefig(f'{metrics_label}')

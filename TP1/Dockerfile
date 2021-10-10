@@ -4,4 +4,4 @@ ADD cluster1.py /
 
 RUN pip install requests
 
-CMD [ "python", "./cluster1.py" ]
+CMD [ "python", "./main.py" ]

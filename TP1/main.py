@@ -1,6 +1,5 @@
 from datetime import datetime
 from datetime import timedelta
-import json
 import requests
 import boto3
 import pandas as pd
@@ -19,22 +18,19 @@ def consumeGETRequestSync(cluster):
     verify=certServer,
     headers=headers,
     cert =(clientCrt, clientKey) )
-    print(r.status_code)
-    print("******************")
-    print("headers:"+ str(r.headers))
-    print("******************")
-    print("content:"+ str(r.text))
 
 def runScenario1():
     #scenario 1
     #for i in range(1000):
     consumeGETRequestSync(cluster=1)
+    consumeGETRequestSync(cluster=2)
 
 def runScenario2():
     #scenario 2
     #for i in range(500):
         #time.sleep(60)
     #for i in range(1000):
+    consumeGETRequestSync(cluster=1)
     consumeGETRequestSync(cluster=2)
 
 #get load balancer 
@@ -48,8 +44,6 @@ def getDimensionInfos(type_dimension):
 
     cluster1 = findNameValue(response["Metrics"], 1, type_dimension)
     cluster2 = findNameValue(response["Metrics"], 2, type_dimension)
-    print(cluster1)
-    print(cluster2)
     #print(json.dumps(response, indent=4, sort_keys=True, default=str))
     return (cluster1['Name'], cluster1['Value'], cluster2['Name'], cluster2['Value'])
 
@@ -119,14 +113,21 @@ def generateGraphs(data_cluster1, data_cluster2):
             plt.plot("Timestamps", "Cluster1", color="red", data=my_data1)
             plt.plot("Timestamps", "Cluster2", color="green", data=my_data2)
             plt.title(metrics_label)
-            plt.legend()
-            plt.savefig(f'{metrics_label}')
+            handles, labels = plt.gca().get_legend_handles_labels()
+            by_label = dict(zip(labels, handles))
+            plt.legend(by_label.values(), by_label.keys())
+            plt.savefig(f"images/{metrics_label}")      
+            
 
 runScenario1()
 runScenario2()
 
 #CloudWatch
-cloudwatch = boto3.client('cloudwatch')
+cloudwatch = boto3.client('cloudwatch', region_name='us-east-1',
+                            aws_access_key_id="ASIAY3WZIEO77IWETMSP",
+                            aws_secret_access_key="xWNzOEdxvIHHwS1SaRULlgRrqpz8BDZXCkMZenb9",
+                            aws_session_token="FwoGZXIvYXdzEGQaDNeMUCKRhKWTa3oXlSLHAf8w2AppOqF7znHqhT+oH5MnctlMqVHtoMf184fsFbkP7D2IE7mULT3q+sjQ2ONibGlwWs6vEsYc1fsjstVC40s5M19rxkfhf/7HPVppJsSCSIEmxzf0DXwiHqEfOC0sDsLpSloCMWse+IhvHlDui/fxlUByiRlTYPdF9qbjM7uOMrpfMDMEEXF6+7dc7N9mLhYkal4CjvGbOm/8PxeRr5clIJ8IAafb4obJXgi1t9j3YPVrrWTW9PJAEJjsrtvXGAfTaokCyVso56mJiwYyLZliNNAthHHufBW59oTelnqn3/jWiTqT0yxEtGrtJjdz41iEPlhK9t+BVny7cg==")
+
 
 #list of metrics 
 # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.list_metrics

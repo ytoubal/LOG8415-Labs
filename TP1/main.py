@@ -1,5 +1,6 @@
-from datetime import datetime
+from datetime import datetime 
 from datetime import timedelta
+import time
 import requests
 import boto3
 import pandas as pd
@@ -21,17 +22,19 @@ def consumeGETRequestSync(cluster):
 
 def runScenario1():
     #scenario 1
-    #for i in range(1000):
-    consumeGETRequestSync(cluster=1)
-    consumeGETRequestSync(cluster=2)
+    for _ in range(1000):
+        consumeGETRequestSync(cluster=1)
+        consumeGETRequestSync(cluster=2)
 
 def runScenario2():
     #scenario 2
-    #for i in range(500):
-        #time.sleep(60)
-    #for i in range(1000):
-    consumeGETRequestSync(cluster=1)
-    consumeGETRequestSync(cluster=2)
+    for _ in range(500):
+        consumeGETRequestSync(cluster=1)
+        consumeGETRequestSync(cluster=2)
+    time.sleep(60)
+    for _ in range(1000):
+        consumeGETRequestSync(cluster=1)
+        consumeGETRequestSync(cluster=2)
 
 #get load balancer 
 def getDimensionInfos(type_dimension):

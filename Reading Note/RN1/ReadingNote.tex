@@ -1,0 +1,194 @@
+\documentclass[11pt]{article}
+\usepackage{amssymb}
+\usepackage[english]{babel}
+\usepackage{fullpage}
+\def\titre{Elasticity in Cloud Computing: State of the Art and Research Challenges
+}
+\def\auteur{Yanis Toubal}
+\def\courriel{}
+\makeatletter
+
+\title{LOG8415\\Concepts avanc\'{e}s en infonuagique}
+
+\author{
+    Foutse Khomh \\
+    S. Amirhossein Abtahizadeh \\
+    D\'{e}partement G\'{e}nie Informatique et G\'{e}nie Logiciel \\
+    \'{E}cole Polytechnique de Montr\'{e}al, Qu\'{e}bec, Canada \\
+    \texttt{foutse.khomh[at]polymtl.ca} \\
+    \texttt{a.abtahizadeh[at]polymtl.ca}
+}
+
+\date{September 22, 2021}
+
+\begin{document}
+\maketitle
+
+\section{Identification}
+
+\paragraph{Student's name:} \auteur
+
+\paragraph{Date of the reading note:} {6 Jun 2017}
+
+\paragraph{Author(s):} {Yahya Al-Dhuraibi, Fawaz Paraiso, Nabil Djarallah, Philippe Merle}
+
+\paragraph{Title of the article:} \titre
+
+\paragraph{Publication:} {Yahya Al-Dhuraibi, Fawaz Paraiso, Nabil Djarallah, Philippe Merle. Elasticity in Cloud Computing:
+State of the Art and Research Challenges. IEEE Transactions on Services Computing, IEEE, 2018,
+11 (2), pp.430-447. ff10.1109/TSC.2017.2711009ff. ffhal-01529654}
+
+\section{Article}
+
+\paragraph{Keywords:} {Cloud Elasticity, Cloud Computing, Auto-scaling, Virtualization, Virtual Machines, Containers}
+
+\paragraph{Concepts and definitions:} 
+~\newline ~\newline
+\begin{minipage}[t]{1\textwidth}
+    \begin{description}
+    \item $\bullet$ Cloud Computing: On-demand access of computing services from a cloud provider via the Internet that usually use a pay-as-you-use pricing model.
+    \item $\bullet$ Cloud Elasticity: Ability of a system to automatically supply resources on demand based on the workload variations.
+    \item $\bullet$ Virtualization: Software that create an abstraction over the computer hardware that allows to run virtual instances of other computer systems. 
+
+    \end{description}
+\end{minipage}
+
+\begin{minipage}[t]{1\textwidth}
+    \begin{description}
+        \item $\bullet$ Containerization: Form of operating system virtualization that packages up code and its dependencies in a unit called container which can be run accros multiple computing environments.
+        \item $\bullet$ Virtual Machine (VM): Virtualization of a computer system that provide the same functionalities as a physical computers by using software. It runs it's own operation system independently of the host machine or other virtual machines.
+        \item $\bullet$ Quality of Service (QoS): Use of mechanisms and technologies to assure the services offered are working as optimally as possible.
+        \item $\bullet$ Quality of Experience (QoE): The measure of the overall satisfaction of the customer's experience with a service
+    \end{description}
+\end{minipage}
+
+~\newline
+\paragraph{Summary:} {This article provide a broader and more detailled review of elasticity in cloud computing compared to what have been done before. It is also the first examination of elasticity of containers.} 
+\\
+\\
+{Since elasticity is still a relatively new concept, only a few papers have been writting on it and only a few basic classifications have been proposed. The authors of this article created a new detailled classification based on the currently used solutions using seven characteristics to classify elasticity mechanisms. Also, the usage of elasticity in containerization, which has never been introduced in a paper before, has been talked about for the first time. }
+\\
+\\
+{When talking about elasticity mechanisms, the authors provided a numerous number of evidences and examples to back their claims. As for their classification of elasticity and taxonomy of elasticity solutions, The authors studied many commercial and academic solutions and papers talking about elasticity before coming up with the classification they propose. they used seven characteristics which are configuration, scope, purpose, mode, method, provider, and architecture. For each characteristic, they provided a detailled explanation and gave multiple examples of old and new solutions. }
+\\
+\\
+{The proposed detailled classification of elasticity mechanisms is easy to understand and provide a meaningful reference. Moreover, the table presenting the existing elasticity solution based on the classication adds even more credibility to the classification mechanisms. When writing about containerization, the authors provided many visual supports which helped digesting the content more easily. Also, a good number of meaningful examples were provided when discussing the different aspects of containers.}
+
+~\newline
+\paragraph{Research contributions:} This paper gave a new detailled and broader classification of elasticity mechanisms by using seven characteristics on top of using sub mechanisms for each characteristics. Some of those characteristics are brand new and they have only being added recently.
+\\ \\
+It is also the first article to talk about the elasticity of containers which is a relatively new concept. The authors mention the fact that even though container-based technologies are gaining increasing popularity among cloud providers, only a few papers have been talking about the elasticity of the containers which is a key concept according to them.
+\\ \\
+The authors, from their perspective, also provided a precise list of challenges and research topics for the future. According to them the elements of the list must be deal with by researchers in order to improve the elasticity of the cloud.
+\section{Analysis}
+
+\paragraph{Quality:} ~\newline
+\begin{tabular}{p{.25\textwidth}p{.25\textwidth}p{.25\textwidth}p{.25\textwidth}}
+\begin{minipage}[t]{.25\textwidth}
+General organization:
+\begin{description}
+\item $\square$ Very good;
+\item $\boxtimes$ Good;
+\item $\square$ Medium;
+\item $\square$ Bad;
+\item $\square$ Very bad.
+\end{description}
+\end{minipage}
+
+&
+
+\begin{minipage}[t]{.25\textwidth}
+Language and style:
+\begin{description}
+\item $\square$ Very good;
+\item $\boxtimes$ Good;
+\item $\square$ Medium;
+\item $\square$ Bad;
+\item $\square$ Very bad.
+\end{description}
+\end{minipage}
+
+&
+
+\begin{minipage}[t]{.25\textwidth}
+Technique:
+\begin{description}
+\item $\square$ Very good;
+\item $\boxtimes$ Good;
+\item $\square$ Medium;
+\item $\square$ Bad;
+\item $\square$ Very bad;
+\item $\square$ N/A.
+\end{description}
+\end{minipage}
+
+&
+
+\begin{minipage}[t]{.25\textwidth}
+Bibliography:
+\begin{description}
+\item $\square$ Very good;
+\item $\boxtimes$ Good;
+\item $\square$ Medium;
+\item $\square$ Bad;
+\item $\square$ Very bad;
+\end{description}
+\end{minipage}
+\end{tabular}
+
+\paragraph{Forces of the message:}
+~\newline
+~\newline
+\begin{minipage}[t]{1\textwidth}
+    \begin{description}
+        \item $\bullet$ The language used was very appropriate and it made it easy to follow the text even without much prior knowledge of cloud. Most of the technical terms were precisely defined by the authors sometimes multiple time throughout the text.
+        \item $\bullet$ A lot of examples were provided in the form of bibliographic references or with visual supports which made it very easy to follow the text, understand the concepts being introduced and summarize the subject.
+        \item $\bullet$ The authors, for the first time, made a survey about the concept of elasticity in containers which is a very good step towards deepening this field of study. They also proposed a new way to classify elasticity mechanisms which could be used as a reference in the future.
+        \item $\bullet$ The balance between the academic and the industrial litterature that has being used provide an excellent balance and a good variety of point of views that added to the quality of the text.
+    \end{description}
+\end{minipage}
+
+\paragraph{Weaknesses of the message:}
+~\newline
+~\newline
+\begin{minipage}[t]{1\textwidth}
+    \begin{description}
+        \item $\bullet$ Towards the end of text, namely in the section 4 and 5, no visual supports have been used which made the text less easier to follow. A table with all the aspects that has been talked about would have been very helpful.
+    \end{description}
+\end{minipage}
+
+\begin{minipage}[t]{1\textwidth}
+    \begin{description}
+        \item $\bullet$ In each section of the text, the information is structured in a different way which makes the text not uniform with respect to the organization. It made it a bit harder to follow the text because of that. 
+        \item $\bullet$ The transition between the different sections is inexistant which make the lecture less fluid and makes harder to get the whole picture of the paper.
+        \item $\bullet$ The elasticity of containers is only briefly mentionned without much depth which doesn't make it a very informative aspect in this article. 
+    \end{description}
+\end{minipage}
+
+\paragraph{Future directions:}
+This article provides a new way to classify elasticity mechanisms which can now be used. It is also the first article to examine the elasticity of containers. 
+\\
+\\
+This new classification could pave the way for others detailled classifications that stay up-to-date with this fast evolving technology and allow us to better understand cloud elasticity. It would also be interesting to evaluate the classification and study it's accuracy. 
+\\
+\\
+This study also makes a very accurate listing of the many issues and challenges that comes with elasticity. It is a very promising field of study so there is a lot of research potential to improve this technology and optimizing the current processes. 
+
+
+\paragraph{Other important articles:}
+~\newline
+~\newline
+\begin{minipage}[t]{1\textwidth}
+    \begin{description}
+        \item $\bullet$ Containers \& Docker: Emerging roles \& future of Cloud technology \\ 2016 2nd International Conference on Applied and Theoretical Computing and Communication Technology (iCATccT)
+        \\ pp. 804-807, 2016 
+        \item $\bullet$ SmartScale: Automatic Application Scaling in Enterprise Clouds \\ in 2012
+        IEEE 5th International Conference on Cloud Computing (CLOUD)
+        \\ pp. 221–228, June 2012
+        \item $\bullet$ Container-based orchestration in cloud: State of the art and challenges \\ in 2015 Ninth International Conference on Complex, Intelligent, and Software Intensive Systems (CISIS)
+        \\  pp. 70–75, IEEE, 2015
+        \item $\bullet$ Automated Control in Cloud Computing: Challenges and Opportunities \\ in Proceedings of the 1st Workshop on Automated Control for Datacenters and Clouds, ACDC ’09 \\
+        pp. 13–18, 2009
+    \end{description}
+\end{minipage}
+\end{document}

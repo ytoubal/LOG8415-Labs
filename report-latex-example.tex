@@ -1,0 +1,1117 @@
+\documentclass[11pt]{article}
+\usepackage{amssymb}
+\usepackage[english]{babel}
+\usepackage{fullpage}
+\usepackage{graphicx,multirow}
+\usepackage{caption}
+\captionsetup{font=bf,belowskip=8pt}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{subfig}
+\usepackage{placeins}
+
+\begin{document}
+\begin{titlepage} 
+	\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+	\center
+	\textsc{\LARGE Polytechnique Montréal}\\[1.5cm]
+	\textsc{\Large LOG8415 : Lab 1}\\[0.5cm]
+	\textsc{\large Advanced Concepts in Cloud Computing}\\[0.5cm]
+	\HRule\\[0.4cm]
+	{\huge\bfseries Selecting VM instances in the Cloud through
+	benchmarking}\\[0.4cm]
+	\HRule\\[1.5cm]
+	{\large\textit{Authors}}\\
+	Louis \textsc{Boudreau} (1791639)\\
+	Laurent \textsc{Pepin} (1739608)\\
+	Tristan \textsc{Mercille-Brunelle} (1740701)\\
+	\vfill\vfill\vfill {\large\today} \vfill\vfill
+	\includegraphics{poly_logo.png}\\[1cm]
+	\vfill
+\end{titlepage}
+
+\tableofcontents
+
+\section{Abstract}
+	\paragraph{} Cloud application architects can choose from a wide selection
+	of VM instances to achieve high levels of performance. Choosing the right
+	instance for the right job is not an exact science. Even if cloud providers
+	classify their instances in categories to help consumers choose right,
+	benchmarking instances is still the best way to properly choose instances
+	for a cloud application. In this paper, a benchmarking analysis is presented
+	on 5 different instances available on Amazon Elastic Compute Cloud in order
+	to find the best instances for a specific cloud application architecture.
+
+	\paragraph{Keywords:}Amazon Elastic Compute Cloud, Regression Analysis,
+	Benchmark, Instance Performance, Cloud Application, Choice of Instance for
+	Cloud Application
+	\pagebreak
+
+\section{Introduction} \label{sec:introduction}
+	\paragraph{} Cloud providers offer multiple services such as platforms,
+	infrastructure and software as a service. Each of these categories contain
+	plenty of products users can choose from in order to build their cloud
+	applications. Amazon Elastic Compute Cloud (Amazon EC2) is an Infrastructure
+	as a service (IaaS) where developers can choose from a large variety of
+	server instances, each having their set of technical particularities.
+	\cite{1}\bigskip
+
+	Since all cloud applications meet different requirements, having the
+	possibility to choose from dozens of server instances, all optimized for
+	specific job types, is a perk. Done right, choosing the right instances for
+	every module of a cloud application can increase the product performance,
+	availability and scalability while reducing infrastructure costs. However,
+	since no cloud application is the same, there is no clear recipe on how to
+	choose the right instance. Benchmarking instances to compare their
+	performances is a great way to find the instances matching the requirements
+	of every module of a cloud application.
+	\bigskip
+
+	In this paper, we use benchmarking on multiple Amazon EC2 instances to find
+	the best fit for a cloud application with storage, heavy data operations and
+	heavy computation needs.
+	\bigskip
+
+	This paper presents the methodology used to find the best instances for the
+	application (section ~\ref{sec:methodology}), the results of the regression analysis done to find
+	the right parameters for benchmarking (section ~\ref{sec:regression_analysis}), the benchmarking results
+	and analysis (section ~\ref{sec:benchmarking_and_results_analysis}) and the application of these results to choose the
+	right instances for the cloud application (section ~\ref{sec:results_application}).
+	\pagebreak
+
+\section{Methodology} \label{sec:methodology}
+	\paragraph{} In order to find the best instances for a specific cloud
+	application, it is necessary to understand the architecture of said
+	application and the needs of the different modules it is made of. Then,
+	server metrics must be chosen to serve as comparison tools. Tools to gather
+	those metrics must also be selected along with their respective
+	configuration parameters. Finally, benchmarking the instances must be done
+	as a repeatable process.
+
+	\subsection{Cloud Application Architecture}
+		\paragraph{} The cloud application targeted by this paper aims to help
+		an online retailer company (Alpha X) get insights on how their business
+		evolves over time. The application must produce data driven information
+		and be boosted by intelligent models. The cloud application is organized
+		as follow: 2 server instances for storage, 3 instances for data
+		extraction and extensive input/output operations and, finally, 2
+		instances for data computation. These 7 instances can all be different.
+		\cite{2}\bigskip
+
+		The architecture indicates that some instances might need to be more
+		storage focused, while others should be chosen for their high
+		input/output performance or heavy computations capabilities.
+	\subsection{Metrics of Comparison}
+		\paragraph{} In order to compare instances performances in respect of
+		the application needs, metrics on these instance characteristics were
+		selected: CPU, IO, IOPS, memory, disk and network throughput.
+		
+		\subsubsection{CPU - Computation Time}
+			\paragraph{} CPU of different instances can be compared using the speed at which they
+			are able to perform a computation. In this paper, we use the time it
+			takes to compute prime numbers as the metric of comparison for CPU.
+			The benchmarking tool \emph{Sysbench} is used to record the time needed to
+			compute all the prime numbers up to a certain value. This maximum prime
+			number is passed as an argument and must be the same for every instance
+			to have a comparison basis of CPU performance. \cite{3}
+		\subsubsection{IO - Throughput}
+			\paragraph{} Formally, I/O (Input/Output) is the operation of taking information from
+			a source A and sending it to a destination B. In the context of cloud
+			computing, multiple forms of I/O such as network I/O, disk I/O and files
+			I/O exist. In this paper, we approached I/O in regards to the disk. The
+			metric used to make the benchmarks is the throughput, i.e. the
+			quantity of data transferred over the time it took to accomplish the
+			task. The utility tool used to benchmark the I/O is \emph{dd}, a Linux built-in
+			software used to copy files from a specified source and destination. 
+		\subsubsection{IOPS}
+			\paragraph{} Input/output operations per second (IOPS) is a metric mainly used to
+			evaluate an instance ability to support a high load of file operations.
+			In the context of this paper, the number of creates per second, reads per
+			second and deletes per second in both sequential and random ways will be
+			used to compare instances IOPS capabilities. \emph{Bonnie++} will be used to
+			perform the tests. \emph{Bonnie++} supports multiple parameters, one of which
+			is the number of files to create, read and delete on each test. In this
+			paper, we will use the same number of files for every instance to
+			have a comparison basis of IOPS performance. \cite{4}
+		\subsubsection{Memory}
+			\paragraph{} Memory (RAM) performance can be measured with the operations per
+			second it can support. Using the tool \emph{stress-ng}, it is possible to gather
+			meaningful data on how well instances handle memory pressure. The tool
+			offers a variety of stressors. To test instances memory performance, the
+			following stressors were chosen: expand heap break point, expand stack
+			and bigheap. These stressors impact the memory and monitor its
+			performance by trying to consume memory at a high rate. The number of
+			operations per second for the categories (heap break point, stack,
+			bigheap) will be used to compare instances. All instances will be tested
+			with the same number of stressors. \cite{5}
+		\subsubsection{Disk - Read Throughput and Latency}
+			\paragraph{} The disk of an instance is the physical device where data
+			is persisted. We used two metrics in order to efficiently benchmark this
+			device. The first one is the disk latency, it refers to the elapsed time
+			between a request for some data and the actual return of the
+			information. The latency is then critical for applications requiring a
+			lot of small consecutive disk access. \emph{Ioping} is the tool we used to
+			compute this metric, it computes the latency mean of multiple
+			consecutive access to the disk requesting for 4 kb of data. The second
+			one is the read throughput and aims at measuring how fast can the disk
+			deliver data. This metric is important for applications needing less
+			frequent disk access but reading huge amount of data each time. Disk
+			read throughput is measured with the quantity of data transferring over
+			the time it took to accomplish this task. Nowadays, disks are built with
+			multiple layers of cache to increase access speed of frequent addresses.
+			The OS must then optimize the way it stores information to take the most
+			out of this cache layer and further increase the system’s performance.
+			The tool used in order to retrieve this information is \emph{Hdparm}.  This
+			command line program has options to compute read throughput with and
+			without caching, which we both used. 
+		\subsubsection{Network Throughput}
+			\paragraph{} Network throughput can be evaluated using download and
+			upload speeds, in bit/s. \emph{Speedtest-cli} will be used to compare network
+			throughput of all instances by evaluating their download and upload
+			speeds. All instances will be tested against the same server, located in
+			Montreal. \cite{6}
+	\subsection{Regression Analysis}
+		\paragraph{} Choosing the right parameters for the benchmarking tests
+		described in the previous section has been done using regression analysis.
+		Regression analysis aims to find the variables having impact on a set of
+		data. \cite{7} This work uses regression analysis to find the limits of each
+		parameter of every benchmarking test. The goal is to find values for every
+		parameter that will remain constant across instance tests and will provide
+		meaningful data and hopefully distinguishable variation between instances. For
+		every parameter, the selected value will be the average between the lower
+		and top limits. Section ~\ref{sec:regression_analysis} exposes the method and results of the regression
+		analysis done to find the right parameters for each test.
+	\subsection{Instances Types}
+		\paragraph{} Amazon EC2 catalog contains dozens of server types. This paper
+		focuses on Ubuntu machines running the last version of the OS (18.04). A
+		total of 5 virtual machines will be compared. One of them is categorized as
+		a general purpose instance, two of them as compute optimized, one of them as memory
+		optimized and the last one as storage optimized. Here is a table showing the
+		chosen instances and their characteristics, as provided by Amazon.
+
+		{\centering
+			\captionof{table}{Chosen Instances and their Characteristics \cite{8}} \label{tab:instances_characteristics}
+			\begin{tabular}{|c|c|c|c|c|c|}
+				\hline
+				Instance & Family & \multirow{2}{*}{vCPU} & Memory & Disk & Network Speed\\
+				Model & Type & & (GiB) & (Mb/s) & (Gb/s)\\
+				\hline
+				a1.large & General Purpose & 2 & 4 & N/A & Up to 10 \\
+				c5.xlarge & Compute Optimized & 4 & 8 & Up to 3500 & Up to 10 \\
+				c5.2xlarge & Compute Optimized & 8 & 16 & Up to 3500 & Up to 10 \\
+				r5.large & Memory Optimized & 2 & 16 & Up to 3500 & Up to 10 \\
+				h1.2xlarge & Storage Optimized & 8 & 32 & N/A & Up to 10 \\
+				\hline
+			\end{tabular}
+		\par }
+		
+		\paragraph{} Terms such as Computed Optimized or General Purpose are quite subjective and that's why it's interesting to define them further. \cite{9}\cite{10}\cite{11}\cite{12}
+
+		\paragraph{General Purpose:} A1 instances deliver significant cost
+		savings for scale-out and Arm-based applications such as web servers,
+		containerized micro-services, caching fleets, and distributed data stores
+		that are supported by the extensive Arm ecosystem. 
+
+		\paragraph{Compute Optimized:} C5 instances offer the lowest price per
+		vCPU in the Amazon EC2 family and are ideal for running advanced
+		compute-intensive workloads.
+
+		\paragraph{Memory Optimized:} R5 instances are well suited for memory
+		intensive applications such as high performance databases, distributed
+		web scale in-memory caches, mid-size in-memory databases, real time big
+		data analytics, and other enterprise applications.
+
+		\paragraph{Storage Optimized:} H1 instances are a new generation of
+		Amazon EC2 Storage Optimized instances designed for applications that
+		require low cost, high disk throughput and high sequential disk I/O
+		access to very large data sets. Offering the best price/performance in
+		the magnetic disk storage EC2 instance family, H1 instances are ideal
+		for data-intensive workloads such as MapReduce-based workloads,
+		distributed file systems, such as HDFS and MapR-FS, network file
+		systems, log or data processing applications such as Apache Kafka, and
+		big data workload clusters.
+
+	\subsection{Benchmarking}
+		\paragraph{} The methodology used to benchmark the instances was to
+		sequentially stress the instance with CPU, IO, IOPS, memory, disk and
+		network, in this order, 5 times. The goal of the test is to find the
+		consequences of the benchmarks on each other and compare instances over
+		multiple characteristics. The sequence of test is done 5 times to be able to
+		take the average of the instance performance, but also analyze the effect of
+		continuous stress on the performance.
+	\subsection{Open Source Code}
+		\paragraph{} Traces of the work done on the instances and of the results
+		analysis can be found online in a GitHub repository:
+		\url{https://github.com/LaurentPepin/LOG8415E}\pagebreak
+
+\section{Regression Analysis} \label{sec:regression_analysis}
+	\paragraph{} In this section, results of regression analyses done for each
+	metric are presented. 
+	\subsection{CPU} 
+		\paragraph{} For CPU, regression analysis was
+		done by finding an integer big  enough so that the most compute optimized
+		instance would take 10 minutes to execute the Sysbench workload. Since
+		computations can run forever, we, as a team, concluded that 10 minutes would
+		be long enough to illustrate a pertinent variance between results of the
+		different machines.  We then made a script to gradually increase the max
+		prime numbers until we reach the 10 minutes mark. The instance we took as
+		the most powerful one is the c5.2xlarge since is has 8 virtual cpu. The
+		following graph illustrates our results.
+		\begin{center}
+			\captionof{figure}{CPU Regression Analysis}
+			\includegraphics[width=\linewidth]{../graphs/cpu_regression_analysis.png}
+		\end{center}
+		\paragraph{} 150970010 is the retained value and therefore the following
+		command is the one used in ours experiments : \bigskip
+
+		\indent \emph{\$ sysbench --max-time=1 cpu --cpu-max-prime=150970010 run*}
+
+		\paragraph{} It is worth saying that we used 1 for the max-time since Sysbench doesn’t stop
+		until he finishes computing all the prime numbers at least one time. It is also
+		worth pointing out that the method used is not a formal regression analysis
+		since we didn't took the average between a minimum and a maximum. The value
+		retained doesn’t push weaker instances outside of their hardware limits
+		instances and therefore using the average between the minimum and the maximum
+		would have only reduced the gap between computation times. 
+	\subsection{IO}
+		\paragraph{} Finding an instance IO maximum that would cause the machine
+		to crash is unlikely, since storage is elastic. That being said, the
+		regression analysis was done by finding a transfer load that was big
+		enough so that the most efficient instance would take 10 minutes to
+		finish the transfer. As for CPU, we, as a team, concluded that 10
+		minutes would be long enough to illustrate a pertinent variance between
+		results of the different machines. The test employed for benchmarking
+		aims at filling a disk partition until there is no more place left and
+		save the elapsed time. In order to find the right EBS volume size for
+		our test, we started by taking samples of the most powerful machine’s
+		throughput in order to roughly estimate the true one. The following
+		table presents our samples. \bigskip
+
+		{\centering
+			\captionof{table}{IO Regression Analysis} \label{tab:io_regression_analysis}
+			\begin{tabular}{c|c}
+				Transferred block quantity & Throughput (MB/s) \\
+				\hline
+				1 & 5.5 \\
+				10 & 70.8 \\
+				100 & 74.4 \\
+				1000 & 58.4 \\
+				10000 & 70.3 \\
+				\hline
+				Average & 55.8 \\
+			\end{tabular}
+		\par }
+		
+		\paragraph{} The instance we took as the most powerful one is the
+		h1.2xlarge since it is described as designed for high disk throughput
+		and high sequential disk I/O access. Since the average throughput is
+		55.8 MB/s, we computed that EBS volume size needed was 31GiB.
+
+		\begin{center}
+			\(55.88 MB/s \times 10^6 B/MB \times 600s \div 2^{30} B/Gib = 31.22 GiB\)
+		\end{center} 
+
+		\paragraph{} The following command is the one used in our IO throughput benchmark: \bigskip
+
+		\indent \textit{\$ sudo dd if=/dev/zero of=/dev/\$DISK\_PARTITION bs=64K}
+	
+		\paragraph{} \textit{dd} will transfer 64kB data blocks from the /dev/zero file,
+		which provides as many null character as you want, to the 31 GiB EBS
+		volume until it’s full.
+	\subsection{IOPS}
+		\paragraph{} For IOPS, regression analysis was done by running the test
+		on the smallest machine (a1.large) with different values for the
+		\emph{number of files} parameter. This parameter takes an integer and \emph{bonnie++}
+		multiplies it by 1024 to get the number of files it needs to work with.
+		By playing with this parameter, we vary the load applied by the test on the
+		instance. Table \ref{tab:iops_regression_analysis} shows results of the regression analysis with a
+		starting value of 500.
+
+		\begin{minipage}{\linewidth}
+		\begin{center}
+			\captionof{table}{IOPS Regression Analysis Results} \label{tab:iops_regression_analysis}
+			\begin{tabular}{|*{8}{c|}}
+				\hline
+				\multirow{3}{*}{Test} & \multirow{3}{1.75cm}{File count (x1024)} & \multicolumn{3}{c}{Sequential}\vline & \multicolumn{3}{c}{Random}\vline \\\cline{3-8}
+				&  & Create & Read & Delete & Create & Read & Delete \\
+				&  & (ops/s) & (ops/s) & (ops/s) & (ops/s) & (ops/s) & (ops/s) \\
+				\hline
+				1 & 500 & 43,333 & 480,990 & 4,102 & 41,652 & 552,323 & 2,879 \\
+				2 & 750 & 27,400 & 475,891 & 3,661 & 27,948 & 542,583 & 2,385 \\
+				3 & 1000 & - & - & - & - & - & -\\
+				\hline
+			\end{tabular}
+		\end{center}
+		\end{minipage}
+
+		\paragraph{} Results show that when the parameter is set to 1000, the
+		test fails to produce any result. Considering this value as the maximum
+		and 500 as the minimum, 750 (average between upper and lower bounds) 
+		will be used for benchmarking. It is also
+		important to note that the value 1000 made the test fail on all 5
+		instances, while 750 worked in all cases.
+
+		\paragraph{} Here is the command to be used for benchmark: \bigskip
+
+		\indent \textit{\$ bonnie++ -d ./iopsTestFiles -s 0 -n 750 -m \$INSTANCE -x 1 -q}
+
+	\subsection{Memory}
+		\paragraph{} Regression analysis for memory was done by varying the number of stressors
+		and counting the number of memory errors produced per test (memory errors
+		are recovered from and do not make the test crash). Every stressor (brk,
+		stack, bigheap) had the same number of stressors, which is the varying
+		parameter. For every instance tested, the goal was to find the number of
+		stressors (same for all 3 categories of stressors) that would produce more
+		than 11 memory errors, at which point the test would stop. The highest
+		number of stressors for the last test across all instances would be the
+		maximum value of the parameter. The minimum is 1. Table \ref{tab:memory_regression_analysis}
+		shows the results obtained.
+		\begin{center}
+			\captionof{table}{Memory Regression Analysis Results} \label{tab:memory_regression_analysis}
+			\begin{tabular}{|*{6}{c|}}
+				\hline
+				\multirow{2}{2cm}{Number of stressors} & \multicolumn{5}{c}{Number of Memory Errors}\vline \\\cline{2-6}
+				& a1.large & c5.xlarge & c5.2xlarge & r5.large & h1.2xlarge \\
+				\hline
+				1 & 2 & 2 & 0 & 0 & 0 \\
+				2 & 4 & 4 & 4 & 4 & 1 \\
+				3 & 6 & 6 & 6 & 6 & 6 \\
+				4 & 8 & 8 & 8 & 8 & 8 \\
+				5 & 10 & 10 & 10 & 10 & 10\\
+				6 & 12 (end) & 12 (end) & 12 (end) & 12 (end)& 12 (end)\\
+				\hline
+			\end{tabular}
+		\end{center}
+		\paragraph{} Results show that 6 stressors per category, total of 18,
+		is a maximum for all instances. Since the minimum is 1
+		stressor, an average of 3 stressors will be used for the benchmarks.
+
+		\paragraph{} Here is the command to be used for benchmark:\bigskip
+
+		\indent \textit{\$ stress-ng --brk 3 --stack 3 --bigheap 3 --metrics-brief --timeout 60s}
+		
+	\subsection{Disk}
+		\paragraph{} There is no parameter other than the disk name used for the
+		disk’s benchmarks. Therefore, there is no need for regression analysis.
+		Here are the commands to be used for benchmark:
+		
+		\setlist[description]{leftmargin=\parindent,labelindent=\parindent}
+		\begin{description}
+			\item \textit{\$ ioping -c 10 ./}
+			\item \textit{\$ sudo hdparm -Tt /dev/\$DISK\_PARTITION}
+		\end{description}
+
+	\subsection{Network Throughput}
+		\paragraph{} There is no parameter for this test except the server to test against. Therefore, there is no need for regression analysis for network throughput.
+		Here is the command to be used for benchmark: \bigskip
+
+		\indent \textit{\$ speedtest-cli --csv --server 911}
+		
+	\subsection{Summary}
+		\paragraph{} Table \ref{tab:regression_analysis_summary} summarizes the parameters values to be
+		used for benchmark. \bigskip
+		
+		\begin{center}
+			\captionof{table}{Summary of Tests Execution} \label{tab:regression_analysis_summary}	
+			\begin{tabular}{|*{4}{c|}}
+				\hline
+				\textbf{Category} & \textbf{Test Name} & \textbf{Parameters} & \textbf{Value} \\
+				 \hline
+				CPU & sysbench & cpu-max-prime & 150970010 \\
+				 \hline
+				IO & dd & partition size & 31GiB \\
+				 \hline
+				IOPS & bonnie++ & n & 750 \\
+				 \hline
+				Memory & stress-ng & brk \& stack \& bigheap & 3 \\
+				 \hline
+				\multirow{2}{*}{Disk} & Ioping & Folder path & ./ \\\cline{2-4}
+				& hdparam & Disk partition & EBS block partition \\
+				\hline
+				Network & speedtest-cli & - & - \\
+				 \hline
+			\end{tabular}
+		\end{center}
+		\pagebreak
+
+\section{Benchmarking and Results Analysis} \label{sec:benchmarking_and_results_analysis}
+	\paragraph{} Benchmarking instances gives meaningful data regarding instances performances in
+	categories. Also, running the test sequence 5 times in a row gives information
+	on how instances perform under different levels of pressure over time. Following
+	are the results of the benchmarks done on the 5 instances. It
+	is worth noting that each benchmark result will be presented in two different
+	forms. The first presents the results of all the instances through their 5 respective
+	iterations and the second is a comparison of the 5 instances average results.
+	
+	\subsection{CPU}
+		\paragraph{} As discussed earlier, CPU performance was monitored by finding the time (in
+		seconds) it took an instance to find the maximum prime number under a
+		specific value. Figure \ref{fig:cpu_average_results} shows the average time needed by each instance to complete
+		the CPU test over 5 executions.
+
+		\begin{center}
+			\begin{minipage}{0.6\textwidth}
+				\captionof{figure}{} \label{fig:cpu_average_results}
+				\includegraphics[width=\linewidth]{../graphs/cpu/average_time.png}
+			\end{minipage}
+		\end{center}
+
+		\paragraph{} Results show that the a1.large machine is the instance that
+		performs the best with an average time of 340.2s. This result is almost
+		half the time required by the second best instance, c5.2xlarge, to
+		complete the test (599.2s). Also, it is clear that h1.2xlarge is the
+		instance that performs the worst with an average of 793.8s. The standard
+		deviation for these averages is 165.23s which confirms that there is
+		variability between the instances performances.
+
+		\paragraph{} It is surprising to see a1.large, a general purpose
+		instance, outperforming c5.xlarge and c5.2xlarge instances, since these
+		last two instances are categorized as compute optimized by AWS.
+
+		\paragraph{} As far is stability is concerned, all instances achieve an
+		almost constant performance over the 5 iterations, as shown in figure \ref{fig:cpu_variation_results}.
+
+		\begin{center}
+			\begin{minipage}{0.6\textwidth}
+				\captionof{figure}{} \label{fig:cpu_variation_results}
+				\includegraphics[width=\linewidth]{../graphs/cpu/time.png}
+			\end{minipage}
+		\end{center}
+		
+		\paragraph{} Therefore, there is no instance that dramatically loses CPU
+		performance under high stress. Except for r5.large (standard deviation
+		of 15.44s), all instances have a standard deviation less than 2.5s which
+		confirms their stability.
+	
+	\subsection{IO}
+		\paragraph{} As presented in previous sections, IO throughput was
+		computed by recording the time needed for an instance to transfer
+		31GiB of data. Figure \ref{fig:io_average_results} shows the average time needed by each
+		instance to complete the data transfer over 5 executions.
+
+		\begin{center}
+		\begin{minipage}{0.6\textwidth}
+			\captionof{figure}{} \label{fig:io_average_results}
+			\includegraphics[width=\linewidth]{../graphs/io_write/average_time.png}
+		\end{minipage}
+		\end{center}
+
+		\paragraph{} Results show that the instance that performs the most was the
+		r5.large with an average transfer time of 446.699 seconds which
+		represents a throughput of  74.5 MB/s. On the other hand, the instance
+		which has the worst performance is the c5.xlarge with an average transfer
+		time of 561.13 seconds which represents a throughput of 59.32 MB/s. The
+		results standard deviation is 51.3s which means that there was some
+		variation between instances results but not a huge one.  It’s
+		interesting to point out that the fastest instance was not the Storage
+		Optimized one (h1.2xlarge). Figure \ref{fig:io_variation_results} illustrates the variation of instances
+		performance over their iterations.
+
+		\begin{center}
+		\begin{minipage}{0.6\textwidth}
+			\captionof{figure}{} \label{fig:io_variation_results}
+			\includegraphics[width=\linewidth]{../graphs/io_write/time.png}
+		\end{minipage}
+		\end{center}
+
+		\paragraph{} By analyzing the graph we can conclude that the IO
+		throughput is quite consistent with an average standard deviation of
+		11.38. Therefore, we can assume that the stress applied on the instances
+		due to the other benchmarks isn’t affecting IO.  There is even one
+		instance, a1.large, for which performance increases with iterations by
+		an average of 11.37 seconds per iteration.
+
+
+	\subsection{IOPS}
+		\paragraph{} Input/output per second benchmarks were measured for each instance 5 times, using a
+		load of 750 (*1024 files) to create, read and delete sequentially and
+		randomly at every iteration (6 measures). Table \ref{tab:iops_avg_tests_results} summarizes the
+		average results for each measure over the 5 iterations and 5 instances, with
+		the associated standard deviation.
+	
+		\begin{minipage}{\textwidth}
+		\begin{center}
+			\captionof{table}{IOPS Measures Averages and their Standard Deviations} \label{tab:iops_avg_tests_results}	
+			\begin{tabular}{|*{4}{c|}}
+				\hline
+				\textbf{Measure} & \textbf{Average} & \textbf{Standard Deviation} & \textbf{Coefficient of Variation} \\
+				\textbf{(qty/s)} & \textbf{(file/s)} & \textbf{(file/s)} & \textbf{(\%)} \\
+				\hline
+				Sequential Create & 39,011.72 & 7,931.51 & 20.33 \\
+				\hline
+				Sequential Read & 541,838.84 & 204,016.20 & 37.65 \\
+				\hline
+				Sequential Delete & 2,685.64 & 313.91 & 11.69 \\
+				\hline
+				Random Create & 27,392.08 & 8,483.13 & 30.97 \\
+				\hline
+				Random Read & 670,588.44 \& & 197,159.75 & 29.40 \\
+				\hline
+				Random Delete & 1,433.48 & 18.38 & 1.28 \\
+				\hline
+			\end{tabular}
+		\end{center}
+		\end{minipage}
+
+		\paragraph{} These results show that create and read operations are
+		associated with higher variance of performance between instances with a
+		coefficient of variation over 20\% compared to the delete operation. In
+		fact, all instances delete files at almost the same rate while they do
+		not perform at the same level for create and read operations, as the
+		graphs in figure \ref{fig:iops_avg_tests_results} confirm.
+
+		\begin{center}
+			\begin{figure}
+				\captionof{figure}{IOPS Average Tests Results} \label{fig:iops_avg_tests_results}
+				\includegraphics[width=0.5\linewidth]{../graphs/iops/average_sequentialCreateBySec.png}
+				\includegraphics[width=0.5\linewidth]{../graphs/iops/average_randomCreateBySec.png}
+				
+				\includegraphics[width=0.5\linewidth]{../graphs/iops/average_sequentialReadBySec.png}
+				\includegraphics[width=0.5\linewidth]{../graphs/iops/average_randomReadBySec.png}
+				
+				\includegraphics[width=0.5\linewidth]{../graphs/iops/average_sequentialDeleteBySec.png}
+				\includegraphics[width=0.5\linewidth]{../graphs/iops/average_randomDeleteBySec.png}
+			\end{figure}
+		\end{center}
+
+		\paragraph{} While it is clear that the a1.large instance underperforms
+		all other instances, there is no clear winner. Instance h1.2xlarge
+		outperforms other instances for create and delete operations but is
+		second to last for the reading speed. Its high performance in creating
+		and deleting file is not surprising since it is classified as a storage
+		optimized instance. Among the three other instances, instance c5.xlarge
+		is the one performing at a high level in all conditions.
+
+		\paragraph{} As far as instances performances over 5 iterations (with 5
+		levels of stress) are concerned, all instances seem to behave the same way, as the
+		graphs in figure \ref{fig:iops_variation_tests_results} display.
+
+		\begin{center}
+			\begin{figure} 
+				\captionof{figure}{IOPS Variation Tests Results} \label{fig:iops_variation_tests_results}
+				\includegraphics[width=0.5\linewidth]{../graphs/iops/sequentialCreateBySec.png}
+				\includegraphics[width=0.5\linewidth]{../graphs/iops/randomCreateBySec.png}
+				\includegraphics[width=0.5\linewidth]{../graphs/iops/sequentialReadBySec.png}
+				\includegraphics[width=0.5\linewidth]{../graphs/iops/randomReadBySec.png}
+				\includegraphics[width=0.5\linewidth]{../graphs/iops/sequentialDeleteBySec.png}
+				\includegraphics[width=0.5\linewidth]{../graphs/iops/randomDeleteBySec.png}
+			\end{figure}
+		\end{center}
+		
+		\paragraph{} It is clear that all instances performances in random file
+		creation, sequential file deletion and random file deletion tend to
+		dramatically go down when they reach the 3rd or 4th iteration. It is
+		interesting to note that, for random creation, instances c5.xlarge and
+		h1.2xlarge lose performance at the last iteration, while the 3 other
+		lose their performance at the 4th iteration. For the other 3 measures,
+		instances don’t lose any noticeable performance due to stress.
+		Therefore, there is no instance that sustains stress better than all the
+		others. \pagebreak
+
+	\subsection{Memory}
+		\paragraph{} Benchmarking for memory consisted of measuring the number
+		of operations per second for 3 memory stressors. Results show instances
+		memory performances. Figures \ref{fig:memory_bigheap_results}, \ref{fig:memory_brk_results},
+		\ref{fig:memory_stack_results} show the average results for every instance
+		for the different measure techniques.
+
+		\begin{center}
+		\begin{minipage}{0.6\textwidth}
+			\captionof{figure}{} \label{fig:memory_bigheap_results}
+			\includegraphics[width=\linewidth]{../graphs/memory/memory_bigheap.png}
+		\end{minipage}
+
+		\begin{minipage}{0.6\textwidth}
+			\captionof{figure}{} \label{fig:memory_brk_results}
+			\includegraphics[width=\linewidth]{../graphs/memory/memory_brk.png}
+		\end{minipage}
+
+		\begin{minipage}{0.6\textwidth}
+			\captionof{figure}{} \label{fig:memory_stack_results}
+			\includegraphics[width=\linewidth]{../graphs/memory/memory_stack.png}
+		\end{minipage}
+		\end{center}
+
+		\paragraph{} Average values for brk, stack and bigheap have respectively
+		a coefficient of variation of 59.14\%, 33.70\% and 58.69\%, which means
+		that there is variation of performance between instances. In fact,
+		figures \ref{fig:memory_bigheap_results}, \ref{fig:memory_brk_results},
+		\ref{fig:memory_stack_results} show that instance h1.2xlarge is the
+		instance that performs the best overall, outperforming all other
+		instances for the bigheap and brk stressors.  Instance r5.large's
+		performance is very surprising. It under-performs all instances for
+		every stressors except for a1.large with bigheap stressor. Being
+		classified as a memory optimized machine, instance r5.large's bad
+		performance does not meet the expectations, which were that it would
+		outperform all other machines.
+
+		\paragraph{} For the memory performance variation relative
+		to stress applied, table \ref{tab:memory_tests_summary_results} and figures
+		\ref{fig:memory_bigheap_variation_results}, \ref{fig:memory_brk_variation_results},
+		\ref{fig:memory_stack_variation_results} show how the
+		performances varied over 5 iterations.
+
+		\begin{minipage}{\linewidth}
+		\begin{center}
+			\captionof{table}{Variation of Memory Performance for Each Instance Over 5 Iterations} \label{tab:memory_tests_summary_results}	
+			\begin{tabular}{|*{5}{c|}}
+				\hline
+				\multirow{3}{2cm}{\textbf{Instance}} & \multirow{3}{2cm}{\textbf{Stressor}} & \multirow{3}{2cm}{\textbf{Average (ops/s)}} & \multirow{3}{2cm}{\textbf{Standard Deviation (ops/s)}} & \multirow{3}{2.5cm}{\textbf{Coefficient of Variation (\%)}} \\
+				 &  &  &  & \\
+				 &  &  &  & \\
+				\hline
+				\multirow{3}{2cm}{a1.large} & bigheap & 187,004.98 & 43,709.34 & 23.37 \\\cline{2-5}
+				& brk & 350.76 & 90.91 & 25.92 \\\cline{2-5}
+				& stack & 11,805.27 & 2,344.92 & 19.86 \\
+				\hline
+				\multirow{3}{2cm}{c5.2xlarge} & bigheap & 627,648.31 & 277,832.59 & 44.27 \\\cline{2-5}
+				& brk & 281.89 & 220.56 & 78.24 \\\cline{2-5}
+				& stack & 41,439.82 & 20,001.59 & 48.27 \\
+				\hline
+				\multirow{3}{2cm}{c5.xlarge} & bigheap & 390,722.41 & 166,369.90 & 42.58 \\\cline{2-5}
+				& brk & 257.54 & 130.92 & 50.84 \\\cline{2-5}
+				& stack & 20,605.62 & 10,318.00 & 50.07 \\
+				\hline
+				\multirow{3}{2cm}{h1.2xlarge} & bigheap & 828,941.35 & 44,994.61 & 5.43 \\\cline{2-5}
+				& brk & 333.48 & 53.08 & 15.92 \\\cline{2-5}
+				& stack & 46,337.31 & 12,320.20 & 26.59 \\
+				\hline
+				\multirow{3}{2cm}{r5.large} & bigheap & 243,473.37 & 6,533.79 & 2.68 \\\cline{2-5}
+				& brk & 121.52 & 6.38 & 5.25 \\\cline{2-5}
+				& stack & 14,765.91 & 1,421.66 & 9.63 \\
+				\hline
+			\end{tabular}
+		\end{center}
+		\end{minipage}
+		
+		\begin{center}
+		\begin{minipage}{0.6\textwidth}
+			\captionof{figure}{} \label{fig:memory_bigheap_variation_results}
+			\includegraphics[width=\linewidth]{../graphs/memory_2/bigheap.png}
+		\end{minipage}
+
+		\begin{minipage}{0.6\textwidth}
+			\captionof{figure}{} \label{fig:memory_brk_variation_results}
+			\includegraphics[width=\linewidth]{../graphs/memory_2/brk.png}
+		\end{minipage}
+
+		\begin{minipage}{0.6\textwidth}
+			\captionof{figure}{} \label{fig:memory_stack_variation_results}
+			\includegraphics[width=\linewidth]{../graphs/memory_2/stack.png}
+		\end{minipage}
+		\end{center}
+
+		\paragraph{} Results show that instance r5.large does not see a high
+		variation in its memory performance over the 5 iterations. While it had
+		the lowest overall performance, it is the instance that is the more
+		stable across levels of memory stress, which makes it an interesting
+		choice for a memory consuming application. Instance h1.2xlarge also keeps
+		a relatively stable performance, compared to instances c5.xlarge and
+		c5.2xlarge. These 2 instances see a drastic loss of performance once
+		they reach the 4th iteration. They are not suited for intense memory
+		work over longer durations but have decent performance for small bursts.
+
+	\subsection{Disk}
+		\paragraph{} As presented in previous sections, Disk performance was
+		benchmarked according to his latency and his read throughput. Figure
+		\ref{fig:disk_avg_results} shows the average disk latency over 5 executions.
+
+		\begin{center}
+		\begin{minipage}{0.6\textwidth}
+			\captionof{figure}{} \label{fig:disk_avg_results}
+			\includegraphics[width=\linewidth]{../graphs/io_latency/average_latencyAvg.png}
+		\end{minipage}
+		\end{center}
+
+		\paragraph{} Results show that the instance that performs the best was
+		the c5.xlarge with an average latency of 246.86 us. On the other hand,
+		the instance that has the worst performance is the r5.large with an
+		average latency of 290.54 us. We can clearly see two levels of
+		performance. On one level there is a1.large, c5.2xlarge and c5.xlarge
+		with an average latency of around 250us and on the other, there is
+		h1.2xlarge and r5.large with a latency of around 295 us. The results
+		average standard deviation is 22.14 which means that there was some
+		variation between instances results but not a huge one.  It’s
+		interesting to point out that the fastest instance was not the Storage
+		Optimized one. Figure \ref{fig:disk_latency_results} illustrates the
+		variation of instances performance over their iterations.
+
+		\begin{center}
+		\begin{minipage}{0.6\textwidth}
+			\captionof{figure}{} \label{fig:disk_latency_results}
+			\includegraphics[width=\linewidth]{../graphs/io_latency/latencyAvg.png}
+		\end{minipage}
+		\end{center}
+
+		\paragraph{} By analyzing the graph we can conclude that the disk
+		average latency is highly variable with an average standard deviation of
+		15.94. Therefore, we can assume that the stress applied on the instances
+		due to the other benchmarks is strongly affecting the disks latency.
+		This high variability throughout time could be explained by the fact
+		that this benchmark is executed just after the IO throughput test.
+		c5.xlarge and h1.2xlarge were more stable than the others with
+		respective standard variation of 9.07 us and 9.39 us.  The others
+		instances, c5.2xlarge, r5.large and a1.large had respective standard
+		variation of 17.4 us, 22.4 us and 21.46 us. 
+
+		\paragraph{} Regarding the disk read throughput, figures \ref{fig:disk_read_throughput_rg_results}
+		and \ref{fig:disk_read_throughput_cached_results} illustrate read
+		throughput performance with and without cache layers respectively.
+
+		\begin{center}
+		\begin{minipage}{0.6\textwidth}
+			\captionof{figure}{} \label{fig:disk_read_throughput_rg_results}
+			\includegraphics[width=\linewidth]{../graphs/io_read/average_regularReadingSpeed.png}
+		\end{minipage}
+		\end{center}
+
+		\paragraph{} After analyzing this graph we can conclude that without
+		cache layers, disk read throughput is almost identical throughout
+		instances. The h1.2xlarge was the one with the highest one with a
+		throughput of 173.93 MB/s. The average standard deviation of 1.522
+		reinforces this point.
+
+		\begin{center}
+			\begin{minipage}{0.6\textwidth}
+				\captionof{figure}{} \label{fig:disk_read_throughput_cached_results}
+				\includegraphics[width=\linewidth]{../graphs/io_read/average_cachedReadingSpeed.png}
+			\end{minipage}
+		\end{center}
+
+		\paragraph{} The results regarding the read throughput with caching
+		are more variable. In fact, the average standard variation of
+		these results is 2811.35. We can clearly see the gap that separates
+		the best and the worst instances. The worst instances is the
+		a1.large with a read throughput of 2207.50 MB/s  while the h1.2xlarge
+		one is more than three times faster with 9091.11 MB/s.  It is
+		interesting to see the that with caching, the h1.2xlarge instance is
+		almost 53 times faster therefore having a huge impact on performance.
+
+
+	\subsection{Network Throughput}
+		\paragraph{} As we discussed in previous sections, the network
+		performance of an instance will be analyzed in regard of the following
+		metrics: download speed and upload speed.
+
+		\begin{center}
+			\begin{minipage}{0.6\textwidth}
+				\captionof{figure}{} \label{fig:network_avg_download_results}
+				\includegraphics[width=\linewidth]{../graphs/network/average_Download.png}
+			\end{minipage}
+		\end{center}
+
+		\paragraph{} By looking at figure \ref{fig:network_avg_download_results}, we can
+		clearly state that the c5.xlarge instance has the best download
+		speed with an average download speed of \(1.64 \times 10^9\) bits/s which is
+		equivalent to 205 MB/s. On the other hand, the a1.large instance is the
+		worst one with an average download speed of \(1.02 \times 10^9\) bits/s or 127.5
+		MB/s. These results illustrate a significant gap since the least performing
+		instance is 61\% slower than the best one. The average standard
+		deviation is \(0.271143343 \times 10^9\)(33,8875 MB/s), we can therefore conclude
+		that a certain variation exist between instances. It is also worth
+		pointing out that the r5.large instance's performance is close to the
+		c5.xlarge one with a difference of only 7.5 MB/s.
+
+		\begin{center}
+			\begin{minipage}{0.6\textwidth}
+				\captionof{figure}{} \label{fig:network_variation_download_results}
+				\includegraphics[width=\linewidth]{../graphs/network/Download.png}
+			\end{minipage}
+		\end{center}
+
+		\paragraph{} Results from figure \ref{fig:network_variation_download_results}
+		show that instances download speed is highly volatile throughout
+		iterations. The average standard deviation is \(0.54 \times 10^9\)
+		bits/s or 67.33MB/s. The instance that showed the highest variability in
+		its download speed is the c5.2xlarge with a standard deviation of \(0.778 \times
+		10^9\) bits/s or 97.37 MB/s. This instance also showed the worst and
+		best download speed. a1.large is the only instance that showed stable
+		results and is also the least performing one. 4 out of 5 instances
+		demonstrated a significant performance decrease between the fourth and
+		the fifth iteration.
+
+		\begin{center}
+			\begin{minipage}{0.6\textwidth}
+				\captionof{figure}{} \label{fig:network_avg_upload_results}
+				\includegraphics[width=\linewidth]{../graphs/network/average_Upload.png}
+			\end{minipage}
+		\end{center}
+
+		\paragraph{} By looking at the graphic (figure
+		\ref{fig:network_avg_upload_results}), we can clearly affirm that the
+		c5.xlarge instance is the best instance in regard to upload with an
+		average download speed of \(1.29 \times 10^9\) bits/s which is
+		equivalent to 161.25 MB/s. On the other hand, the a1.large instance is
+		the worst one with an average upload speed of \(7.8 \times 10^8\) or 96
+		MB/s. These results illustrate a significant gap since the least
+		performing instance is 68\% slower than the best one. The average
+		standard  deviation is \(0.2 \times 10^9\) or 25.49 MB/s. We can
+		therefore conclude that a certain variation exists between instances. It is
+		also worth pointing out that the c5.2xlarge instance's performance is
+		close to the c5.xlarge one with a difference of only 8.75 MB/s.
+
+		\begin{center}
+			\begin{minipage}{0.6\textwidth}
+				\captionof{figure}{} \label{fig:network_variation_upload_results}
+				\includegraphics[width=\linewidth]{../graphs/network/Upload.png}
+			\end{minipage}
+		\end{center}
+
+		\paragraph{} Results (figure \ref{fig:network_variation_upload_results}
+		show that instances upload speed is quite stable throughout iterations.
+		It's worth pointing out that the instances r5.large and c5.2xlarge showed
+		a significant performance drop in their last iteration. The average
+		standard deviation of \(0.3 \times 10^9\) bits/s or 37.75 MB/s doesn’t really reflect
+		the true variation since it is affected by the drop of performance we
+		just discussed. 
+
+		\paragraph{} By analyzing results for both upload and download speeds,
+		we can conclude that the c5.xlarge is the most performing instance. We can
+		also affirm that the a1.large one is the least performing one with
+		respect to the two metrics. One interesting thing to note is the fact
+		that the upload speed showed more stable results than download. Also,
+		the download speed was faster than the upload speed for all of the
+		instances. AWS claims that these instances have network capacity going
+		up to 10 Gb/s while the highest one we recorded was of 2.24 Gb/s.
+		
+	\subsection{Summary}
+		\paragraph{} This section aims to provide a visualization of the
+		conclusions that have been exposed in the preceding section. Table
+		\ref{tab:summry_benchmark_analyses} illustrates the instances that outperformed others (++) or
+		performed slightly better than the others (+).
+
+		\begin{center}
+			\begin{minipage}{\linewidth}
+			\captionof{table}{Summary of Benchmarks Analyses} \label{tab:summry_benchmark_analyses}	
+			\begin{tabular}{|*{9}{c|}}
+				\hline
+				\multirow{3}{*}{} & \multicolumn{8}{c}{Metric}\vline \\\cline{2-9}
+				& \multirow{2}{*}{CPU} & IO & \multirow{2}{*}{IOPS} & \multirow{2}{*}{Memory} &
+				 			Disk Read & Disk & Network & Network \\
+				&  & Throughput &  &  & Throughput & Latency & Download & Upload \\
+				\hline
+				a1.large & ++ & & & & + & + & & \\
+				\hline
+				c5.large & + & & ++ & & + & ++ & & ++ \\
+				\hline
+				c5.2xlarge & + & ++ & + & + & + & + & ++ & + \\
+				\hline
+				r5.large & & ++ & & + & + & & & \\
+				\hline
+				h1.2xlarge & & + & ++ & ++ & + & & & \\
+				\hline
+			\end{tabular}
+			\end{minipage}
+		\end{center}
+		\pagebreak
+
+	\section{Results Application} \label{sec:results_application}
+		\paragraph{} Benchmarking the instances gave meaningful results. Results
+		showed that instances do not always perform as expected from their
+		classification. Using these results, it is now possible to assign the
+		right instance for every module of the cloud application subject to this
+		paper.
+
+    	\paragraph{} First of all, the cloud application needs 2 instances for
+    	storage intensive work, 3 instances for heavy input/output operations
+    	and data extraction and finally, it needs 2 instances for heavy data
+    	computation. Figure \ref{fig:design_artchitecture} shows the way these instances should
+    	interact with each other. \cite{2}
+
+		\begin{center}
+			\begin{minipage}{0.8\textwidth}
+				\captionof{figure}{Design Architecture Elements \cite{2}} \label{fig:design_artchitecture}
+				\includegraphics[width=\linewidth]{design_architecture_elements.png}
+			\end{minipage}
+		\end{center}
+
+		\textsc{\Large{\textbf{Storage Module}}}
+
+		\paragraph{} The 2 instances in the storage module need high storage
+		performance. Storage optimized instances can be recognized by their high
+		rate of read and write accesses with low latency. Also, they support very
+		high levels of input/output operations per second. \cite{13}
+
+		\paragraph{} Following is an overview of characteristics used to evaluate
+		whether or not instances would fit in the storage module, and a recap of
+		the instances performances in each of them.
+
+		\paragraph{IO Throughput:} Instances that performed well and achieved
+		stability for IO throughput were c5.2xlarge, r5.large and h1.2xlarge. 
+
+		\paragraph{IOPS:} Instances c5.2xlarge and h1.2xlarge, along with
+		instance c5.xlarge, also outperformed other instances in the IOPS
+		benchmarks. However, instance c5.2xlarge tended to lose performance
+		earlier than the 2 others, and should be considered as less stable.
+
+		\paragraph{Disk Read Throughput:} All instances achieved almost the same
+		disk reading speed.
+
+		\paragraph{Disk Latency:} Instances c5.xlarge and c5.2xlarge were the
+		best regarding disk latency, but the difference with other instances is
+		less than 60us. 
+
+		\paragraph{Network Upload:} Storage module's need of high network upload
+		performance could be assured by either c5.xlarge or c5.2xlarge, but
+		instance c5.xlarge achieved performance stability across the 5
+		iterations while instance c5.2xlarge saw its network upload capacity
+		dramatically go down in the 5th iteration.
+
+		\paragraph{} Using these results, it is recommended to use one c5.xlarge
+		instance and h1.2xlarge instance for the storage module because they
+		offer great performance for storage related characteristics and because
+		they are more stable that others regarding storage related work.\bigskip
+		
+		\textsc{\Large{\textbf{Compute Module}}}
+
+		\paragraph{} The 3 instances in the compute module need
+		to be able to download a lot of data over the network. They also need to
+		be able to do a lot of input/output operations. They should have great
+		memory performance.
+
+		\paragraph{} Here is an overview of characteristics used to evaluate
+		whether instances would fit in the compute module or not, and a recap of
+		the instances performances in each of them.
+
+		\paragraph{IOPS:} Instances c5.2xlarge and h1.2xlarge, along with
+		instance c5.xlarge, also outperformed other instances in the IOPS
+		benchmarks. However, instance c5.2xlarge tended to lose performance
+		earlier than the 2 other, and should be considered as less stable.
+
+		\paragraph{Memory:} Instance h1.2xlarge performed very well in the
+		memory benchmarking. While instance c5.2xlarge also performed well, it
+		was not stable and loss a lot of performance as the tests progressed.
+		Instance r5.large was the most stable, but showed a poor overall
+		performance.
+
+		\paragraph{Cache Reading Speed:} Instance h1.2xlarge achieved the best
+		performance regarding cache reading speed, with instances c5.xlarge,
+		c5.2xlarge and r5.large not far behind. Cache reading speed performance
+		is key for data operations.
+
+		\paragraph{Network Download:} Instances c5.xlarge and r5.large achieved
+		the best performances for download, but instance r5.large showed less
+		stability in its performance. Therefore, instance c5.xlarge should be
+		prioritized.
+
+		\paragraph{Network Upload:} Instances c5.xlarge or c5.2xlarge performed
+		well, but instance c5.xlarge achieved performance stability across the 5
+		iterations while instance c5.2xlarge saw its network upload capacity
+		dramatically go down in the 5th iteration.
+
+		\paragraph{} Because of its cache reading speed, iops and memory
+		performances, two instances h1.2xlarge should be in the compute module.
+		For its network performance and overall good performance in data
+		operation activities, one instance c5.xlarge should also be in the the
+		compute module. \pagebreak
+		
+		\textsc{\Large{\textbf{Visualization Module}}}
+
+		\paragraph{} The visualization module needs 2 instances with good CPU and memory
+		performance because they will need to make heavy computations on
+		processed data.
+
+		\paragraph{} Here is an overview of characteristics used to evaluate
+		whether instances would fit in the visualization module or not, and a
+		recap of the instances performances in each of them.
+
+		\paragraph{CPU:} Instance a1.large was the instance that performed the
+		best in the CPU benchmarks, followed by instances c5.2xlarge and
+		c5.xlarge. All instances achieved good performance stability during
+		the benchmarks.
+
+		\paragraph{Memory:} Instance h1.2xlarge performed very well in the
+		memory benchmarking. While instance c5.2xlarge also performed well, it
+		was not stable and loss a lot of performance as the tests progressed.
+		Instance r5.large was the most stable, but showed poor overall
+		performance.
+
+		\paragraph{Cache Reading Speed:} Instance h1.2xlarge achieved the best
+		performance regarding cache reading speed, with instances c5.xlarge,
+		c5.2xlarge and r5.large not far behind. Cache reading speed performance
+		is key for data operations.
+
+		\paragraph{Network download:} Instances c5.xlarge and r5.large achieved
+		the best performance for download, but instance r5.large showed less
+		stability in its performance. Therefore, instance c5.xlarge should be
+		prioritized. 
+		
+		\paragraph{} Because this module needs to do a lot of heavy
+		computations, it should be composed of two c5.xlarge. This instance has
+		good CPU, network download and cache reading performances and achieve
+		respectable memory performance. \bigskip
+		
+		\pagebreak
+		\textsc{\Large{\textbf{Summary}}} 
+
+		\paragraph{} Table \ref{tab:chosen_instances} is a summary of the instances chosen for each
+		module.
+		
+		\begin{center}
+			\captionof{table}{Chosen Instances for each Module} \label{tab:chosen_instances}
+			\begin{tabular}{l|l}
+				Module & Instance \\
+				\hline
+				Storage - Instance 1 & c5.xlarge \\
+				Storage - Instance 2 & h1.2xlarge \\
+				Compute - Instance 3 & h1.2xlarge \\
+				Compute - Instance 4 & h1.2xlarge \\
+				Compute - Instance 5 & c5.xlarge \\
+				Visualization - Instance 6 & c5.xlarge \\
+				Visualization - Instance 7 & c5.xlarge \\
+			\end{tabular}
+		\end{center}
+
+\section{Future Directions}
+		\paragraph{} First, due to a limited timeline for this lab, we had to
+		cut corners at some points. The regression analysis is a good example.
+		In order to speed up the execution of our tests, we arbitrarily chose
+		time limits that we thought made sense. For the CPU tests, we simply
+		picked a 10 minutes timeout out of our hats.
+
+		\paragraph{} Secondly, we think it would have been interesting to push
+		our analysis further with payloads and stress that would be closer to a
+		real application. In our experiments we did our tests sequentially, with
+		a pretty heavy payload, but in a real context, we might have had
+		different results.
+
+		\paragraph{} Third, there are multiple factors that weren't considered
+		in our analysis. One of them is the price of each instance, which would
+		have a huge impact on the instance choice. It's easy to choose the best
+		instance in terms of performance, but the balance between cost and
+		performance is harder to find. Another factor we could have considered
+		is the time at which we ran our benchmarks. We know that cloud computing
+		is all about sharing resources, which could have induced some more
+		stress on the machines on which our instances were running.
+
+\section{Conclusion}
+		\paragraph{} In conclusion, the realization of this study helped us
+		achieve a deeper understanding of the virtual machines benchmarking
+		world. We also learned to execute our own experiments in order to
+		build an opinion about what service providers offer instead of blindly
+		trusting what they're telling us. These skills
+		are primordial in today's industry in order to achieve optimal cost
+		versus performance of a cloud architecture. The next step would be to
+		deploy an actual application with such services and see how it performs.
+
+\begin{thebibliography} {}
+	\bibitem{1} Amazon Web Services. (2019) Amazon EC2. [Online] Available: \url{https://aws.amazon.com/ec2/?sc_channel=PS&sc_campaign=acquisition_CA&sc_publisher=google&sc_medium=ACQ-R%7CPS-GO%7CBrand%7CDesktop%7CSU%7CCompute%7CEC2%7CCA%7CEN%7CText%7CHV&sc_content=ec2_p&sc_detail=aws%20ec2&sc_category=Compute&sc_segment=293632235728&sc_matchtype=p&sc_country=CA&s_kwcid=AL!4422!3!293632235728!p!!g!!aws%20ec2&ef_id=CjwKCAiAhp_jBRAxEiwAXbniXW4VNB3YH9HfaHYWdecb0vJMXWoO5hI77E3TBV3QuJ7pgtdhgfhRpBoCK34QAvD_BwE:G:s}
+	\bibitem{2} S. A. Abtahizadeh, \emph{LOG8415: Lab 1 Selecting VM instances in the Cloud through benchmarking}, LOG8415: Advanced Concepts of Cloud Computing, 2019.
+	\bibitem{3} A. Kopytov, SysBench manual, MySQL AB, 2009. [Online]. Available: \url{http://imysql.com/wp-content/uploads/2014/10/sysbench-manual.pdf}
+	\bibitem{4} B. Martin. (2008) Using Bonnie++ for filesystem performance benchmarking. [Online]. Available: https://www.linux.com/news/using-bonnie-filesystem-performance-benchmarking
+	\bibitem{5} UbuntuWiki. (2018) stress-ng. [Online]. Available: \url{https://wiki.ubuntu.com/Kernel/Reference/stress-ng}
+	\bibitem{6} Mankier. (2019) Speedtest-cli man page. [Online]. Available: \url{https://www.mankier.com/1/speedtest-cli#--bytes}
+	\bibitem{7} SurveyGizmo. (2018) Regression Analysis. [Online]. Available: \url{https://www.surveygizmo.com/resources/blog/regression-analysis/}
+	\bibitem{8} Amazon Web Services. (2019) Amazon EC2 Instance Types. [Online]. Available:\url{https://aws.amazon.com/ec2/instance-types/}
+	\bibitem{9} Amazon Web Services. (2019) Amazon EC2 C5 Instances. [Online]. Available:\url{https://aws.amazon.com/ec2/instance-types/c5/}
+	\bibitem{10} Amazon Web Services. (2019) Amazon EC2 A1 Instances. [Online]. Available: https://aws.amazon.com/ec2/instance-types/a1/
+	\bibitem{11} Amazon Web Services. (2019) Amazon EC2 H1 Instances. [Online]. Available:  https://aws.amazon.com/ec2/instance-types/h1/
+	\bibitem{12} Amazon Web Services. (2019) Amazon EC2 R5 Instances. [Online]. Available: \url{https://aws.amazon.com/ec2/instance-types/r5/}
+	\bibitem{13} Amazon Web Services. (2019) Storage Optimized Instances. [Online]. Available: \url{https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/storage-optimized-instances.html}
+	\bibitem{14} E. Shanks. (2013) Disk Latency Concepts. [Online]. Available: \url{https://theithollow.com/2013/11/18/disk-latency-concepts/}
+	\bibitem{15} Linux Die. hdparm(8) - Linux man page. [Online]. Available: \url{https://linux.die.net/man/8/hdparm}
+	\bibitem{16} K. Khlebnikov and K. Kolyshkin. Ioping (1) - Linux Man Pages. [Online]. Available:\url{https://www.systutorials.com/docs/linux/man/1-ioping/}
+\end{thebibliography}
+
+\end{document}

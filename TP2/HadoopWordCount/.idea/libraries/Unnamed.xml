@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Unnamed">
+    <CLASSES>
+      <root url="jar:///usr/local/hadoop-2.5.1/share/hadoop/common/hadoop-common-2.5.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="jar:///usr/local/hadoop-2.5.1/share/hadoop/common/hadoop-common-2.5.1.jar!/" recursive="false" />
+  </library>
+</component>
